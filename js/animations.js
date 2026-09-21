@@ -78,6 +78,35 @@ function typewriterHeroSubtitle() {
     tick();
 }
 
+// ---------- Menu book intro (cinematic page-flip before landing on the menu) ----------
+function playMenuBookIntro(onComplete) {
+    const overlay = document.getElementById('bookOverlay');
+    if (!overlay) { onComplete(); return; }
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) { onComplete(); return; }
+
+    populateBookPages();
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+
+    const TOTAL_DURATION = 3600; // ms — matches the CSS cover+page animation-delay/duration chain
+    let done = false;
+
+    const finish = () => {
+        if (done) return;
+        done = true;
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+        skipBtn.removeEventListener('click', finish);
+        onComplete();
+    };
+
+    const skipBtn = document.getElementById('bookSkipBtn');
+    skipBtn.addEventListener('click', finish);
+    setTimeout(finish, TOTAL_DURATION);
+}
+
 // ---------- Navbar scroll behavior ----------
 function setupNavbarScroll() {
     const navbar = document.querySelector('.navbar');
