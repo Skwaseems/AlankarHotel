@@ -308,169 +308,255 @@ function displayMenuItems() {
     refreshCategoryDatalist();
 }
 
-// ==================== CUSTOMER MENU: FILTER + RENDER ====================
-function getFilteredGroupedItems() {
-    const q = (typeof searchQuery !== 'undefined' ? searchQuery : '').trim().toLowerCase();
+// ==================== CUSTOMER MENU: PAGES ====================
+// Each category is one "page" of the menu book. The diet filter (All / Veg /
+// Non-Veg) decides which items — and therefore which pages — exist.
+let currentCategory = null;
+let leafFlipping = false;
+
+const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+function splitCategory(category) {
+    const m = category.match(/^(.*?)\s*(\(.*\))\s*$/);
+    return m && m[1] ? { title: m[1], sub: m[2] } : { title: category, sub: '' };
+}
+
+function dietAllows(item) {
     const filter = typeof dietFilter !== 'undefined' ? dietFilter : 'all';
-
-    const filtered = menuData.items.filter(item => {
-        const matchesSearch = !q ||
-            item.name.toLowerCase().includes(q) ||
-            item.category.toLowerCase().includes(q) ||
-            (item.description && item.description.toLowerCase().includes(q));
-        if (!matchesSearch) return false;
-
-        if (filter === 'all') return true;
-        const diet = classifyDiet(item.name);
-        if (filter === 'veg') return diet === 'veg' || diet === 'both';
-        if (filter === 'nonveg') return diet === 'nonveg' || diet === 'both';
-        return true;
-    });
-
-    const grouped = {};
-    filtered.forEach(item => {
-        if (!grouped[item.category]) grouped[item.category] = [];
-        grouped[item.category].push(item);
-    });
-    return grouped;
+    if (filter === 'all') return true;
+    const diet = classifyDiet(item.name);
+    return filter === 'veg' ? diet !== 'nonveg' : diet !== 'veg';
 }
 
-function renderCategoryStrip() {
-    const container = document.getElementById('categoryStrip');
-    if (!container) return;
-    const categories = [...new Set(menuData.items.map(item => item.category))];
-    const counts = {};
-    menuData.items.forEach(item => { counts[item.category] = (counts[item.category] || 0) + 1; });
+function getPages() {
+    const grouped = new Map();
+    menuData.items.filter(dietAllows).forEach(item => {
+        if (!grouped.has(item.category)) grouped.set(item.category, []);
+        grouped.get(item.category).push(item);
+    });
+    return [...grouped].map(([category, items]) => ({ category, items }));
+}
 
-    container.innerHTML = categories.map(cat => `
-        <div class="category-strip-card reveal anim-scale" data-target="${slugify(cat)}">
-            <span class="category-strip-icon">${getCategoryIcon(cat)}</span>
-            <div class="category-strip-name">${escapeHtml(cat)}</div>
-            <div class="category-strip-count">${counts[cat]} dishes</div>
+function buildLeaf(page, index, total, extraClass) {
+    const { title, sub } = splitCategory(page.category);
+    const leaf = document.createElement('article');
+    leaf.className = 'leaf' + (extraClass ? ' ' + extraClass : '');
+    leaf.dataset.category = page.category;
+    leaf.innerHTML = `
+        <div class="leaf-front">
+            <div class="leaf-head">
+                <span class="leaf-icon" aria-hidden="true">${getCategoryIcon(page.category)}</span>
+                <div class="leaf-titles">
+                    <h2>${escapeHtml(title)}</h2>
+                    ${sub ? `<span class="leaf-sub">${escapeHtml(sub)}</span>` : ''}
+                </div>
+                <span class="leaf-count">${page.items.length}<small>dish${page.items.length === 1 ? '' : 'es'}</small></span>
+            </div>
+            <div class="dish-grid">
+                ${page.items.map((item, i) => `
+                    <button class="dish" type="button" style="--i:${Math.min(i, 14)}" onclick="openQuickView(${item.id})">
+                        <span class="dish-name">${dietMarkup(item.name)}<span>${escapeHtml(item.name)}</span></span>
+                        <span class="dish-price">₹ ${escapeHtml(item.rate)}</span>
+                    </button>
+                `).join('')}
+            </div>
+            <div class="leaf-folio">— ${index + 1} of ${total} —</div>
         </div>
+        <div class="leaf-back" aria-hidden="true"></div>
+    `;
+    return leaf;
+}
+
+function renderStageEmpty(stage) {
+    const filtered = menuData.items.length > 0;
+    stage.innerHTML = `
+        <div class="empty-state">
+            <div class="empty-icon">${filtered ? '🥗' : '🍽️'}</div>
+            <h3>${filtered ? 'No dishes in this filter' : 'No dishes available yet'}</h3>
+            <p>${filtered ? 'Try switching the filter back to All.' : "Please check back soon — we're updating our menu."}</p>
+            ${filtered ? '<button class="btn btn-primary btn-small" type="button" onclick="setDietFilter(\'all\')">Show All</button>' : ''}
+        </div>`;
+}
+
+// Re-draws the current page in place (no flip) — used after data/filter changes.
+function renderCurrentLeaf(animated) {
+    const stage = document.getElementById('leafStage');
+    if (!stage) return;
+    const pages = getPages();
+    if (pages.length === 0) { renderStageEmpty(stage); return; }
+    let index = pages.findIndex(p => p.category === currentCategory);
+    if (index < 0) index = 0;
+    currentCategory = pages[index].category;
+    stage.replaceChildren(buildLeaf(pages[index], index, pages.length, animated ? 'leaf-fade' : ''));
+}
+
+function goToPage(index) {
+    const pages = getPages();
+    if (!pages.length || leafFlipping) return;
+    index = Math.max(0, Math.min(pages.length - 1, index));
+    const currentIndex = pages.findIndex(p => p.category === currentCategory);
+    if (index === currentIndex) return;
+
+    const forward = index > currentIndex;
+    currentCategory = pages[index].category;
+    updatePagerAndRail(pages);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+
+    const stage = document.getElementById('leafStage');
+    const oldLeaf = stage.querySelector('.leaf');
+    const newLeaf = buildLeaf(pages[index], index, pages.length);
+
+    if (!oldLeaf || currentIndex < 0 || REDUCED_MOTION.matches) {
+        stage.replaceChildren(newLeaf);
+        return;
+    }
+
+    leafFlipping = true;
+    stage.style.minHeight = oldLeaf.offsetHeight + 'px';
+    stage.classList.add('is-flipping');
+
+    let flipper;
+    if (forward) {
+        // the current page lifts off to the left, revealing the next one beneath it
+        newLeaf.classList.add('leaf-under');
+        stage.appendChild(newLeaf);
+        oldLeaf.classList.add('flipping', 'flip-out');
+        flipper = oldLeaf;
+    } else {
+        // the previous page swings back in from the left, covering the current one
+        newLeaf.classList.add('flipping', 'flip-in');
+        stage.appendChild(newLeaf);
+        flipper = newLeaf;
+    }
+
+    let finished = false;
+    const finish = () => {
+        if (finished) return;
+        finished = true;
+        oldLeaf.remove();
+        newLeaf.classList.remove('flipping', 'flip-in', 'leaf-under');
+        stage.style.minHeight = '';
+        stage.classList.remove('is-flipping');
+        leafFlipping = false;
+    };
+    flipper.addEventListener('animationend', (e) => { if (e.target === flipper) finish(); });
+    setTimeout(finish, 1100);
+}
+
+function stepPage(delta) {
+    const pages = getPages();
+    const i = pages.findIndex(p => p.category === currentCategory);
+    goToPage(i + delta);
+}
+
+function updatePagerAndRail(pages) {
+    pages = pages || getPages();
+    const index = pages.findIndex(p => p.category === currentCategory);
+
+    const label = document.getElementById('pagerLabel');
+    if (label) {
+        label.innerHTML = index < 0 ? '' :
+            `<b>${escapeHtml(splitCategory(currentCategory).title)}</b><small>Page ${index + 1} of ${pages.length}</small>`;
+    }
+    const prev = document.getElementById('pagerPrev');
+    const next = document.getElementById('pagerNext');
+    if (prev) prev.disabled = index <= 0;
+    if (next) next.disabled = index < 0 || index >= pages.length - 1;
+
+    const rail = document.getElementById('catRail');
+    if (rail) {
+        let activeChip = null;
+        rail.querySelectorAll('.chip').forEach(chip => {
+            const on = chip.dataset.category === currentCategory;
+            chip.classList.toggle('active', on);
+            chip.setAttribute('aria-selected', on ? 'true' : 'false');
+            if (on) activeChip = chip;
+        });
+        if (activeChip) {
+            rail.scrollTo({
+                left: activeChip.offsetLeft - (rail.clientWidth - activeChip.offsetWidth) / 2,
+                behavior: REDUCED_MOTION.matches ? 'auto' : 'smooth'
+            });
+        }
+    }
+    document.querySelectorAll('#catGrid .cat-card').forEach(card => {
+        card.classList.toggle('active', card.dataset.category === currentCategory);
+    });
+}
+
+function renderCategoryRail(pages) {
+    const rail = document.getElementById('catRail');
+    if (!rail) return;
+    rail.innerHTML = pages.map(p => `
+        <button class="chip" type="button" role="tab" data-category="${escapeHtml(p.category)}">
+            <span aria-hidden="true">${getCategoryIcon(p.category)}</span>${escapeHtml(splitCategory(p.category).title)}
+        </button>
     `).join('');
-
-    container.querySelectorAll('.category-strip-card').forEach(card => {
-        card.addEventListener('click', () => jumpToCategory(card.dataset.target));
+    rail.querySelectorAll('.chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            const i = getPages().findIndex(p => p.category === chip.dataset.category);
+            goToPage(i);
+        });
     });
 }
 
-function renderCategoryChips() {
-    const container = document.getElementById('categoryChips');
-    if (!container) return;
-    const categories = [...new Set(menuData.items.map(item => item.category))];
-    container.innerHTML = categories.map(cat =>
-        `<button class="chip" data-target="${slugify(cat)}"><span>${getCategoryIcon(cat)}</span>${escapeHtml(cat)}</button>`
-    ).join('');
-
-    container.querySelectorAll('.chip').forEach(chip => {
-        chip.addEventListener('click', () => jumpToCategory(chip.dataset.target));
+function renderCategoryGrid(pages) {
+    const grid = document.getElementById('catGrid');
+    if (!grid) return;
+    grid.innerHTML = pages.map((p, i) => `
+        <button class="cat-card" type="button" data-category="${escapeHtml(p.category)}" style="--i:${i}">
+            <span class="cat-card-icon" aria-hidden="true">${getCategoryIcon(p.category)}</span>
+            <span class="cat-card-name">${escapeHtml(splitCategory(p.category).title)}</span>
+            <span class="cat-card-count">${p.items.length} dishes</span>
+        </button>
+    `).join('');
+    grid.querySelectorAll('.cat-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const i = getPages().findIndex(p => p.category === card.dataset.category);
+            closeSheets();
+            setScreen('menu');
+            setTimeout(() => goToPage(i), 260);
+        });
     });
 }
 
-function jumpToCategory(targetId) {
-    const hadFilters = searchQuery !== '' || dietFilter !== 'all';
-    if (hadFilters) {
-        clearAllFilters(false);
-    }
-    const target = document.getElementById(targetId);
-    if (target) {
-        requestAnimationFrame(() => target.scrollIntoView({ behavior: 'smooth', block: 'start' }));
-    }
+function setDietFilter(value) {
+    dietFilter = value;
+    document.querySelectorAll('.diet-toggle-btn').forEach(b => b.classList.toggle('active', b.dataset.diet === value));
+    updateCustomerMenu(true);
 }
 
-function updateCustomerMenu() {
-    document.getElementById('displayName').textContent = menuData.restaurant.name;
-    document.getElementById('footerName').textContent = menuData.restaurant.name;
-    document.getElementById('footerYearName').textContent = menuData.restaurant.name;
+function updateCustomerMenu(animateLeaf) {
+    const { name, phone, timings, address } = menuData.restaurant;
+    document.getElementById('displayName').textContent = name;
+    document.getElementById('menuBrandName').textContent = name;
+    document.getElementById('footerYearName').textContent = name;
 
-    const phoneNumbers = menuData.restaurant.phone.split(',').map(p => p.trim()).filter(Boolean);
-    const phoneHtml = phoneNumbers.map(num =>
-        `<a href="tel:${escapeHtml(num)}">${escapeHtml(num)}</a>`
-    ).join(' &nbsp;|&nbsp; ');
-    document.getElementById('displayPhone').innerHTML = '📱 ' + phoneHtml;
-    document.getElementById('footerPhone').innerHTML = '📱 ' + phoneHtml;
-
-    document.getElementById('displayTimings').textContent = '⏰ ' + menuData.restaurant.timings;
-    document.getElementById('footerTimings').textContent = '⏰ ' + menuData.restaurant.timings;
+    const phoneNumbers = phone.split(',').map(p => p.trim()).filter(Boolean);
+    document.getElementById('displayPhone').innerHTML = phoneNumbers
+        .map(num => `<a href="tel:${escapeHtml(num.replace(/[^\d+]/g, ''))}">${escapeHtml(num)}</a>`).join('');
+    document.getElementById('displayTimings').textContent = timings;
 
     const addressEl = document.getElementById('footerAddress');
-    if (menuData.restaurant.address && menuData.restaurant.address.trim()) {
-        addressEl.textContent = '📍 ' + menuData.restaurant.address.trim();
+    if (address && address.trim()) {
+        addressEl.textContent = '📍 ' + address.trim();
         addressEl.style.display = 'block';
     } else {
         addressEl.style.display = 'none';
     }
 
-    updateFloatingContacts(phoneNumbers);
-    renderCategoryChips();
-    renderCategoryStrip();
+    updateContactSheet(phoneNumbers);
 
-    const grouped = getFilteredGroupedItems();
-    const display = document.getElementById('menuItemsDisplay');
+    const pages = getPages();
+    if (!pages.some(p => p.category === currentCategory)) currentCategory = pages.length ? pages[0].category : null;
 
-    if (menuData.items.length === 0) {
-        display.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-icon">🍽️</div>
-                <h3>No dishes available yet</h3>
-                <p>Please check back soon — we're updating our menu.</p>
-            </div>`;
-        return;
-    }
+    renderCategoryRail(pages);
+    renderCategoryGrid(pages);
+    renderCurrentLeaf(animateLeaf === true);
+    updatePagerAndRail(pages);
+    document.getElementById('pager').classList.toggle('hidden', pages.length === 0);
 
-    if (Object.keys(grouped).length === 0) {
-        display.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-icon">🔎</div>
-                <h3>No dishes match your search</h3>
-                <p>Try a different keyword or clear the filters.</p>
-                <button class="btn btn-primary btn-small" onclick="clearAllFilters(true)">Clear Filters</button>
-            </div>`;
-        return;
-    }
-
-    const q = (typeof searchQuery !== 'undefined' ? searchQuery : '').trim();
-    const animTypes = ['anim-up', 'anim-left', 'anim-right', 'anim-scale'];
-
-    display.innerHTML = Object.entries(grouped).map(([category, items], sectionIdx) => `
-        <div class="category-section reveal ${animTypes[sectionIdx % animTypes.length]}" id="${slugify(category)}">
-            <div class="category-header">
-                <span class="category-icon">${getCategoryIcon(category)}</span>
-                <span class="category-name">${escapeHtml(category)}</span>
-                <span class="category-count">${items.length} item${items.length === 1 ? '' : 's'}</span>
-            </div>
-            <div class="category-items">
-                ${items.map(item => `
-                    <div class="menu-item" onclick="openQuickView(${item.id})">
-                        <div class="item-info">
-                            <div class="item-title-row">
-                                ${dietMarkup(item.name)}
-                                <div class="item-title">${highlightMatch(item.name, q)}</div>
-                            </div>
-                            ${item.description ? `<div class="item-description">${highlightMatch(item.description, q)}</div>` : ''}
-                        </div>
-                        <div class="item-leader"></div>
-                        <div class="item-price">₹ ${escapeHtml(item.rate)}</div>
-                    </div>
-                `).join('')}
-            </div>
-        </div>
-    `).join('');
-
-    setupScrollObservers();
-    updateStickyOffset();
-}
-
-function clearAllFilters(rerender) {
-    searchQuery = '';
-    dietFilter = 'all';
-    const input = document.getElementById('searchInput');
-    if (input) input.value = '';
-    const box = document.getElementById('searchBox');
-    if (box) box.classList.remove('has-value');
-    document.querySelectorAll('.diet-toggle-btn').forEach(b => b.classList.toggle('active', b.dataset.diet === 'all'));
-    if (rerender !== false) updateCustomerMenu();
+    if (typeof renderSearchResults === 'function') renderSearchResults();
 }
 
 // ==================== QUICK VIEW MODAL ====================
@@ -489,10 +575,8 @@ function openQuickView(id) {
         descEl.style.display = 'none';
     }
 
-    const callBtn = document.getElementById('quickViewCallBtn');
-    const firstPhone = menuData.restaurant.phone.split(',')[0].trim();
-    callBtn.href = 'tel:' + firstPhone;
-
+    const firstPhone = menuData.restaurant.phone.split(',')[0].trim().replace(/[^\d+]/g, '');
+    document.getElementById('quickViewCallBtn').href = 'tel:' + firstPhone;
     document.getElementById('quickViewModal').classList.add('active');
 }
 
@@ -511,7 +595,7 @@ function populateBookPages() {
         if (cat) {
             face.innerHTML = `
                 <span class="page-icon">${getCategoryIcon(cat)}</span>
-                <span class="page-title">${escapeHtml(cat)}</span>
+                <span class="page-title">${escapeHtml(splitCategory(cat).title)}</span>
                 <span class="page-sub">and more...</span>
             `;
         } else {
@@ -524,15 +608,21 @@ function populateBookPages() {
     });
 }
 
-function updateFloatingContacts(phoneNumbers) {
-    const callFab = document.getElementById('fabCall');
-    const whatsappFab = document.getElementById('fabWhatsapp');
-    if (!phoneNumbers || phoneNumbers.length === 0) return;
+// ==================== CONTACT SHEET ====================
+function updateContactSheet(phoneNumbers) {
+    const list = document.getElementById('callList');
+    if (!list || !phoneNumbers || phoneNumbers.length === 0) return;
+
+    list.innerHTML = phoneNumbers.map(num => `
+        <a class="call-row" href="tel:${escapeHtml(num.replace(/[^\d+]/g, ''))}">
+            <span class="call-ico">📞</span><span>Call ${escapeHtml(num)}</span>
+        </a>`).join('');
 
     const firstPhone = phoneNumbers[0].replace(/[^\d+]/g, '');
-    if (callFab) callFab.href = 'tel:' + firstPhone;
-    if (whatsappFab) {
-        const waNumber = firstPhone.replace(/^\+/, '').replace(/^0/, '91');
-        whatsappFab.href = 'https://wa.me/' + waNumber;
-    }
+    const waNumber = firstPhone.replace(/^\+/, '').replace(/^0/, '91');
+    document.getElementById('callWhatsapp').href = 'https://wa.me/' + (waNumber.length === 10 ? '91' + waNumber : waNumber);
+
+    const { timings, address } = menuData.restaurant;
+    document.getElementById('callMeta').innerHTML =
+        `<div>⏰ ${escapeHtml(timings)}</div>` + (address && address.trim() ? `<div>📍 ${escapeHtml(address.trim())}</div>` : '');
 }

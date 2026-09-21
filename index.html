@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0e0e0e">
     <title>Alankar Restaurant — Digital Menu</title>
     <meta name="description" content="Alankar Restaurant digital menu — browse dishes, prices and categories.">
 
@@ -13,120 +14,135 @@
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/animations.css">
-    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/customer.css">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
 
     <script src="js/menu.js" defer></script>
     <script src="js/search.js" defer></script>
     <script src="js/admin.js" defer></script>
-    <script src="js/particles.js" defer></script>
     <script src="js/animations.js" defer></script>
     <script src="js/app.js" defer></script>
 </head>
 <body>
-    <!-- Ambient background -->
     <div class="ambient-bg" aria-hidden="true">
         <div class="ambient-glow gold"></div>
         <div class="ambient-glow orange"></div>
         <div class="watermark-pattern"></div>
     </div>
-    <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
 
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="nav-brand" id="navBrand">
-            <span class="nav-icon">🍽️</span>
-            <span id="navBrandName">Alankar Restaurant</span>
-        </div>
-        <div class="nav-links" id="navLinks">
-            <button class="nav-link active" data-view="customer">View Menu</button>
-            <button class="nav-link" data-view="admin">Admin Panel</button>
-        </div>
-        <button class="nav-icon-btn nav-hamburger" id="navHamburger" aria-label="Menu">☰</button>
-    </nav>
-
-    <!-- ==================== CUSTOMER MENU VIEW ==================== -->
+    <!-- ==================== CUSTOMER APP ==================== -->
     <div class="customer-menu active" id="customerMenu">
 
-        <!-- Hero -->
-        <header class="hero">
-            <div class="hero-emblem" aria-hidden="true"></div>
-            <div class="hero-particles" id="heroParticles"></div>
-            <div class="hero-content">
-                <span class="hero-icon">👨‍🍳</span>
-                <h1 class="hero-title" id="displayName">Alankar Restaurant</h1>
-                <p class="hero-subtitle" id="heroSubtitle">Authentic Flavors, Cooked With Tradition</p>
-                <div class="hero-meta">
-                    <span id="displayPhone">📱 +91 9404790786</span>
-                    <span id="displayTimings">⏰ 09:00 AM - 11:30 AM (Breakfast) | 11:30 AM - 11:00 PM</span>
-                </div>
-                <button class="hero-cta" id="heroCta">✨ Explore Menu</button>
-            </div>
-            <div class="scroll-indicator">
-                <span>Scroll</span>
-                <span class="arrow">⌄</span>
-            </div>
-        </header>
+        <!-- HOME -->
+        <section class="screen screen-home active" id="screenHome" aria-label="Home">
+            <div class="home-emblem" aria-hidden="true"></div>
+            <div class="home-inner">
+                <span class="home-icon" aria-hidden="true">👨‍🍳</span>
+                <span class="eyebrow home-eyebrow">Welcome to</span>
+                <h1 class="home-title" id="displayName">Alankar Restaurant</h1>
+                <p class="home-subtitle" id="heroSubtitle">Authentic Flavors, Cooked With Tradition</p>
+                <div class="orn" aria-hidden="true"><span></span><i>❖</i><span></span></div>
 
-        <!-- Sticky search / filter / category chips -->
-        <div class="quick-nav" id="quickNav">
-            <div class="quick-nav-inner">
-                <div class="quick-nav-row">
-                    <div class="search-pill" id="searchBox">
-                        <input type="text" id="searchInput" placeholder="Search dishes...">
-                        <span class="search-icon">🔍</span>
-                        <button class="search-clear" id="searchClearBtn" type="button" aria-label="Clear search">✕</button>
+                <div class="home-info">
+                    <div class="info-card">
+                        <span class="info-label">Timings</span>
+                        <span class="info-value" id="displayTimings"></span>
                     </div>
-                    <div class="diet-toggle-group">
-                        <button class="diet-toggle-btn active" data-diet="all">All</button>
-                        <button class="diet-toggle-btn" data-diet="veg">🟢 Veg</button>
-                        <button class="diet-toggle-btn" data-diet="nonveg">🔺 Non-Veg</button>
+                    <div class="info-card">
+                        <span class="info-label">Call to order</span>
+                        <span class="info-value" id="displayPhone"></span>
                     </div>
                 </div>
-                <div class="category-chip-row" id="categoryChips"></div>
-            </div>
-        </div>
 
-        <!-- Browse by category -->
-        <section class="category-strip-section" id="categorySection">
-            <div class="section-heading">
-                <span class="eyebrow">Browse</span>
-                <h2>Explore By Category</h2>
+                <button class="home-cta" id="heroCta" type="button"><span>Open the Menu</span><b aria-hidden="true">→</b></button>
+                <p class="home-hint">Swipe or tap arrows to turn the pages</p>
             </div>
-            <div class="category-strip" id="categoryStrip"></div>
+            <footer class="home-foot">
+                <div class="footer-line" id="footerAddress" style="display:none;"></div>
+                <div class="footer-note">© <span id="footerYear"></span> <span id="footerYearName">Alankar Restaurant</span> · <button class="staff-link" type="button" id="staffLink">Staff login</button></div>
+            </footer>
         </section>
 
-        <!-- Full menu -->
-        <div class="menu-container">
-            <p class="menu-intro" style="text-align:center; font-size:13.5px; color:var(--text-muted); max-width:560px; margin:0 auto 20px; line-height:1.6;">
-                Browse the full menu below — search for a dish, filter by veg/non-veg, or tap a category to jump straight to it. Tap any dish for a closer look.
-            </p>
-            <div class="menu-legend">
-                <span class="legend-item"><span class="diet-mark veg"></span> Vegetarian</span>
-                <span class="legend-item"><span class="diet-mark nonveg"></span> Non-Vegetarian</span>
-                <span class="legend-item"><span class="diet-marks"><span class="diet-mark veg"></span><span class="diet-mark nonveg"></span></span> Both Options</span>
+        <!-- MENU BOOK -->
+        <section class="screen screen-menu" id="screenMenu" aria-label="Menu">
+            <header class="menu-top">
+                <div class="menu-top-row">
+                    <div class="menu-brand"><span aria-hidden="true">🍽️</span><span id="menuBrandName">Alankar Restaurant</span></div>
+                    <div class="diet-toggle-group" role="group" aria-label="Filter by diet">
+                        <button class="diet-toggle-btn active" data-diet="all" type="button">All</button>
+                        <button class="diet-toggle-btn" data-diet="veg" type="button"><span class="diet-mark veg"></span>Veg</button>
+                        <button class="diet-toggle-btn" data-diet="nonveg" type="button"><span class="diet-mark nonveg"></span>Non-Veg</button>
+                    </div>
+                </div>
+                <div class="cat-rail" id="catRail" role="tablist" aria-label="Menu categories"></div>
+            </header>
+
+            <div class="leaf-stage" id="leafStage"></div>
+
+            <div class="pager" id="pager">
+                <button class="pager-btn" id="pagerPrev" type="button" aria-label="Previous page">‹</button>
+                <div class="pager-label" id="pagerLabel" aria-live="polite"></div>
+                <button class="pager-btn" id="pagerNext" type="button" aria-label="Next page">›</button>
             </div>
-            <div id="menuItemsDisplay"></div>
+        </section>
+
+        <!-- BOTTOM NAVIGATION -->
+        <nav class="bottom-nav" id="bottomNav" aria-label="Main">
+            <button class="bn-item active" data-nav="home" type="button">
+                <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h5v-6h4v6h5V9.5"/></svg>
+                <span>Home</span>
+            </button>
+            <button class="bn-item" data-nav="menu" type="button">
+                <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"/><path d="M4 5.5v16"/><path d="M9 8h7"/></svg>
+                <span>Menu</span>
+            </button>
+            <button class="bn-item" data-nav="categories" type="button">
+                <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>
+                <span>Categories</span>
+            </button>
+            <button class="bn-item" data-nav="search" type="button">
+                <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
+                <span>Search</span>
+            </button>
+            <button class="bn-item" data-nav="call" type="button">
+                <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>
+                <span>Call</span>
+            </button>
+        </nav>
+
+        <!-- SHEETS -->
+        <div class="sheet-overlay" id="sheetOverlay"></div>
+
+        <div class="sheet" id="sheetCategories" role="dialog" aria-modal="true" aria-label="All categories">
+            <div class="sheet-handle"></div>
+            <div class="sheet-head"><h2>All Categories</h2><button class="sheet-close" data-close-sheet type="button" aria-label="Close">✕</button></div>
+            <div class="cat-grid" id="catGrid"></div>
         </div>
 
-        <!-- Footer -->
-        <footer class="site-footer">
-            <div class="footer-inner">
-                <div class="footer-brand" id="footerName">Alankar Restaurant</div>
-                <div class="footer-line" id="footerAddress" style="display:none;"></div>
-                <div class="footer-line" id="footerTimings"></div>
-                <div class="footer-line" id="footerPhone"></div>
-                <div class="footer-note">© <span id="footerYear"></span> <span id="footerYearName">Alankar Restaurant</span>. All rights reserved.</div>
+        <div class="sheet sheet-tall" id="sheetSearch" role="dialog" aria-modal="true" aria-label="Search dishes">
+            <div class="sheet-handle"></div>
+            <div class="sheet-head"><h2>Search</h2><button class="sheet-close" data-close-sheet type="button" aria-label="Close">✕</button></div>
+            <div class="search-pill" id="searchBox">
+                <input type="search" id="searchInput" placeholder="Search dishes..." autocomplete="off">
+                <button class="search-clear" id="searchClearBtn" type="button" aria-label="Clear search">✕</button>
             </div>
-        </footer>
+            <div class="search-results" id="searchResults"></div>
+        </div>
+
+        <div class="sheet" id="sheetCall" role="dialog" aria-modal="true" aria-label="Contact">
+            <div class="sheet-handle"></div>
+            <div class="sheet-head"><h2>Order &amp; Contact</h2><button class="sheet-close" data-close-sheet type="button" aria-label="Close">✕</button></div>
+            <div class="call-list" id="callList"></div>
+            <a class="call-row whatsapp" id="callWhatsapp" href="https://wa.me/" target="_blank" rel="noopener"><span class="call-ico">💬</span><span>Chat on WhatsApp</span></a>
+            <div class="call-meta" id="callMeta"></div>
+        </div>
     </div>
 
     <!-- ==================== ADMIN PANEL VIEW ==================== -->
     <div class="admin-panel" id="adminPanel">
         <div class="admin-header">
+            <button class="admin-back-btn" type="button" onclick="switchView('customer')">← Back to Menu</button>
             <div class="admin-header-row">
                 <div>
                     <h1>🍽️ Restaurant Menu Management System</h1>
@@ -282,7 +298,7 @@
         </div>
     </div>
 
-    <!-- Quick View Modal (customer) -->
+    <!-- Quick View Modal / Edit Item Modal -->
     <div class="modal-overlay" id="quickViewModal">
         <div class="modal-box" role="dialog" aria-modal="true">
             <button class="modal-close" onclick="closeQuickView()" aria-label="Close">✕</button>
@@ -327,7 +343,7 @@
         </div>
     </div>
 
-    <!-- Menu Book Intro (plays when "Explore Menu" is clicked, then hands off to the real menu) -->
+    <!-- Menu Book Intro -->
     <div class="book-overlay" id="bookOverlay">
         <button class="book-skip" id="bookSkipBtn" type="button">Skip ✕</button>
         <div class="book-stage">
@@ -360,12 +376,5 @@
     </div>
 
     <div class="toast-container" id="toastContainer"></div>
-
-    <!-- Floating quick-contact buttons (real actions only — no fake cart) -->
-    <div class="floating-contacts">
-        <button class="fab fab-top" id="fabTop" onclick="scrollToTop()" aria-label="Back to top">↑</button>
-        <a class="fab fab-call" id="fabCall" href="tel:" aria-label="Call restaurant">📞</a>
-        <a class="fab fab-whatsapp" id="fabWhatsapp" href="https://wa.me/" target="_blank" rel="noopener" aria-label="WhatsApp restaurant">💬</a>
-    </div>
 </body>
 </html>

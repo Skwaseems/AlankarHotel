@@ -107,52 +107,6 @@ function playMenuBookIntro(onComplete) {
     setTimeout(finish, TOTAL_DURATION);
 }
 
-// ---------- Navbar scroll behavior ----------
-function setupNavbarScroll() {
-    const navbar = document.querySelector('.navbar');
-    if (!navbar) return;
-    let lastY = window.scrollY;
-
-    window.addEventListener('scroll', () => {
-        const y = window.scrollY;
-        navbar.classList.toggle('shrink', y > 60);
-
-        if (y > lastY && y > 140) {
-            navbar.classList.add('nav-hidden');
-        } else {
-            navbar.classList.remove('nav-hidden');
-        }
-        lastY = y;
-
-        const fabTop = document.getElementById('fabTop');
-        if (fabTop) fabTop.classList.toggle('show', y > 400);
-    }, { passive: true });
-}
-
-// ---------- Optional GSAP enhancement layer ----------
-function setupGsapEnhancements() {
-    if (typeof gsap === 'undefined') return;
-    if (typeof ScrollTrigger !== 'undefined') gsap.registerPlugin(ScrollTrigger);
-
-    gsap.timeline()
-        .from('.hero-icon', { y: -20, opacity: 0, duration: 0.8, ease: 'back.out(1.7)' });
-
-    if (typeof ScrollTrigger !== 'undefined') {
-        gsap.utils.toArray('.category-strip-card').forEach((card, i) => {
-            gsap.fromTo(card, { y: 30, opacity: 0.001 }, {
-                y: 0, opacity: 1, duration: 0.6, delay: (i % 6) * 0.05, ease: 'power3.out',
-                scrollTrigger: { trigger: card, start: 'top 92%', once: true }
-            });
-        });
-    }
-}
-
 document.addEventListener('DOMContentLoaded', () => {
-    spawnHeroParticles();
-    setupCursorGlow();
-    setupHeroParallax();
-    setupMagneticButtons();
-    setupNavbarScroll();
     typewriterHeroSubtitle();
-    setupGsapEnhancements();
 });

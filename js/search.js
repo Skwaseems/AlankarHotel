@@ -1,106 +1,73 @@
 /* ====================================================================
-   SEARCH, DIET FILTER, SCROLL REVEAL + SCROLLSPY
+   SEARCH SHEET + DIET FILTER
    ==================================================================== */
 
 let searchQuery = '';
 let dietFilter = 'all';
-let revealObserver = null;
-let spyObserver = null;
 
-// Rotating search placeholder cycles through real dish names from the
-// actual menu data (never fabricated examples).
-function pickPlaceholderSamples() {
-    const names = menuData.items.map(i => i.name.replace(/\(.*?\)/g, '').split('/')[0].trim());
-    const unique = [...new Set(names)].filter(n => n.length > 2 && n.length < 20);
+// Suggestion chips come from real dish names in the menu data.
+function pickSuggestions() {
+    const names = menuData.items.map(i => i.name.replace(/\(.*?\)/g, '').split('/')[0].replace(/^Veg\.?\s*/i, '').trim());
+    const unique = [...new Set(names)].filter(n => n.length > 2 && n.length < 18);
     const picks = [];
     const seen = new Set();
-    while (picks.length < 4 && seen.size < unique.length) {
+    while (picks.length < 6 && seen.size < unique.length) {
         const idx = Math.floor(Math.random() * unique.length);
-        if (!seen.has(idx)) {
-            seen.add(idx);
-            picks.push(unique[idx]);
-        }
+        if (!seen.has(idx)) { seen.add(idx); picks.push(unique[idx]); }
     }
-    return picks.length ? picks : ['Paneer', 'Biryani', 'Kebabs'];
+    return picks;
 }
 
-function startPlaceholderTypewriter() {
-    const input = document.getElementById('searchInput');
-    if (!input) return;
-    const samples = pickPlaceholderSamples().map(s => `Search ${s}...`);
-    let wordIndex = 0;
-    let charIndex = 0;
-    let deleting = false;
+function renderSearchResults() {
+    const box = document.getElementById('searchResults');
+    if (!box) return;
+    const q = searchQuery.trim();
 
-    function tick() {
-        if (document.activeElement === input || input.value) {
-            setTimeout(tick, 400);
-            return;
-        }
-        const current = samples[wordIndex];
-        if (!deleting) {
-            charIndex++;
-            input.placeholder = current.slice(0, charIndex);
-            if (charIndex === current.length) {
-                deleting = true;
-                setTimeout(tick, 1400);
-                return;
-            }
-        } else {
-            charIndex--;
-            input.placeholder = current.slice(0, charIndex);
-            if (charIndex === 0) {
-                deleting = false;
-                wordIndex = (wordIndex + 1) % samples.length;
-            }
-        }
-        setTimeout(tick, deleting ? 35 : 70);
-    }
-    tick();
-}
-
-function setupScrollObservers() {
-    if (revealObserver) revealObserver.disconnect();
-    if (spyObserver) spyObserver.disconnect();
-
-    revealObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('revealed');
-                revealObserver.unobserve(entry.target);
-            }
+    if (!q) {
+        box.innerHTML = `
+            <p class="search-hint">Search by dish or category</p>
+            <div class="suggest-row">
+                ${pickSuggestions().map(s => `<button class="chip" type="button" data-suggest="${escapeHtml(s)}">${escapeHtml(s)}</button>`).join('')}
+            </div>`;
+        box.querySelectorAll('[data-suggest]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const input = document.getElementById('searchInput');
+                input.value = btn.dataset.suggest;
+                input.dispatchEvent(new Event('input'));
+                input.focus();
+            });
         });
-    }, { threshold: 0.1 });
-
-    spyObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const id = entry.target.id;
-                document.querySelectorAll('.chip').forEach(chip => {
-                    chip.classList.toggle('active', chip.dataset.target === id);
-                });
-            }
-        });
-    }, { rootMargin: '-35% 0px -55% 0px', threshold: 0 });
-
-    document.querySelectorAll('.category-section').forEach(section => {
-        revealObserver.observe(section);
-        spyObserver.observe(section);
-    });
-
-    document.querySelectorAll('.category-strip-card').forEach(card => {
-        revealObserver.observe(card);
-    });
-}
-
-function updateStickyOffset() {
-    const nav = document.querySelector('.navbar');
-    const quickNav = document.querySelector('.quick-nav');
-    const total = (nav ? nav.offsetHeight : 0) + (quickNav ? quickNav.offsetHeight : 0) + 16;
-    document.documentElement.style.setProperty('--sticky-offset', total + 'px');
-    if (quickNav && nav) {
-        quickNav.style.top = nav.offsetHeight + 'px';
+        return;
     }
+
+    const needle = q.toLowerCase();
+    const results = menuData.items.filter(item => dietAllows(item) && (
+        item.name.toLowerCase().includes(needle) ||
+        item.category.toLowerCase().includes(needle) ||
+        (item.description && item.description.toLowerCase().includes(needle))));
+
+    const filterNote = dietFilter === 'all' ? '' :
+        ` · <button class="link-btn" type="button" onclick="setDietFilter('all')">${dietFilter === 'veg' ? 'Veg' : 'Non-Veg'} only — show all</button>`;
+
+    if (results.length === 0) {
+        box.innerHTML = `
+            <div class="empty-state compact">
+                <div class="empty-icon">🔎</div>
+                <h3>No dishes match “${escapeHtml(q)}”</h3>
+                <p>Try a different keyword${filterNote ? '' : '.'}${filterNote}</p>
+            </div>`;
+        return;
+    }
+
+    box.innerHTML = `<p class="search-count">${results.length} dish${results.length === 1 ? '' : 'es'} found${filterNote}</p>` +
+        results.map((item, i) => `
+            <button class="result-row" type="button" style="--i:${Math.min(i, 10)}" onclick="openQuickView(${item.id})">
+                <span class="result-main">
+                    <span class="result-name">${dietMarkup(item.name)}<span>${highlightMatch(item.name, q)}</span></span>
+                    <span class="result-cat">${getCategoryIcon(item.category)} ${escapeHtml(splitCategory(item.category).title)}</span>
+                </span>
+                <span class="dish-price">₹ ${escapeHtml(item.rate)}</span>
+            </button>`).join('');
 }
 
 function setupSearchAndFilters() {
@@ -114,26 +81,21 @@ function setupSearchAndFilters() {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
             searchQuery = e.target.value;
-            updateCustomerMenu();
-        }, 150);
+            renderSearchResults();
+        }, 120);
     });
 
     clearBtn.addEventListener('click', () => {
         searchInput.value = '';
         searchBox.classList.remove('has-value');
         searchQuery = '';
-        updateCustomerMenu();
+        renderSearchResults();
         searchInput.focus();
     });
 
     document.querySelectorAll('.diet-toggle-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            document.querySelectorAll('.diet-toggle-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            dietFilter = btn.dataset.diet;
-            updateCustomerMenu();
+            if (btn.dataset.diet !== dietFilter) setDietFilter(btn.dataset.diet);
         });
     });
-
-    startPlaceholderTypewriter();
 }

@@ -1,19 +1,18 @@
 /* ====================================================================
    APP BOOTSTRAP
-   Wires up navigation, tabs, and all the module setup calls once the
-   DOM is ready. This is the only file that assumes the others (menu.js,
-   search.js, admin.js, particles.js, animations.js) have already run.
+   Screens (home / menu book), bottom navigation, bottom sheets,
+   page-turn gestures and the customer <-> admin view switch.
    ==================================================================== */
 
-// ==================== UI NAVIGATION ====================
+let currentScreen = 'home';
+let screenTimer = null;
+let openSheetId = null;
+
+// ==================== VIEW SWITCH (customer / admin) ====================
 function switchView(view) {
     const adminPanel = document.getElementById('adminPanel');
     const customerMenu = document.getElementById('customerMenu');
-    const navLinks = document.querySelectorAll('.nav-link');
-
-    navLinks.forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll(`.nav-link[data-view="${view}"]`).forEach(btn => btn.classList.add('active'));
-    closeMobileNav();
+    closeSheets();
 
     if (view === 'admin') {
         adminPanel.classList.add('active');
@@ -24,9 +23,8 @@ function switchView(view) {
         customerMenu.classList.add('active');
         adminPanel.classList.remove('active');
         replayEnterAnimation(customerMenu);
-        updateStickyOffset();
     }
-    window.scrollTo({ top: 0, behavior: 'instant' in document.documentElement.style ? 'instant' : 'auto' });
+    window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
 function switchTab(tabName) {
@@ -43,96 +41,137 @@ function switchTab(tabName) {
     }
 }
 
-function closeMobileNav() {
-    const links = document.getElementById('navLinks');
-    if (links) links.classList.remove('mobile-open');
+// ==================== SCREENS ====================
+function setScreen(name) {
+    if (name === currentScreen) { syncBottomNav(); return; }
+    const from = document.getElementById(currentScreen === 'home' ? 'screenHome' : 'screenMenu');
+    const to = document.getElementById(name === 'home' ? 'screenHome' : 'screenMenu');
+    const goingForward = name === 'menu';
+    currentScreen = name;
+
+    clearTimeout(screenTimer);
+    from.classList.remove('entering-fwd', 'entering-back');
+    from.classList.add('leaving');
+    screenTimer = setTimeout(() => {
+        from.classList.remove('active', 'leaving');
+        to.classList.add('active', goingForward ? 'entering-fwd' : 'entering-back');
+        window.scrollTo({ top: 0, behavior: 'instant' });
+    }, REDUCED_MOTION.matches ? 0 : 200);
+
+    syncBottomNav();
 }
 
-function scrollToMenu() {
-    const target = document.getElementById('categorySection') || document.getElementById('quickNav');
-    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+function syncBottomNav() {
+    const active = openSheetId ? { sheetCategories: 'categories', sheetSearch: 'search', sheetCall: 'call' }[openSheetId] : currentScreen;
+    const items = document.querySelectorAll('.bn-item');
+    items.forEach(btn => btn.classList.toggle('active', btn.dataset.nav === active));
+    document.getElementById('bottomNav').dataset.active = active;
 }
 
-function scrollToTop() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+// ==================== SHEETS ====================
+function openSheet(id) {
+    if (openSheetId === id) return;
+    if (openSheetId) document.getElementById(openSheetId).classList.remove('open');
+    openSheetId = id;
+    document.getElementById('sheetOverlay').classList.add('open');
+    document.getElementById(id).classList.add('open');
+    document.body.classList.add('sheet-open');
+    syncBottomNav();
+    if (id === 'sheetSearch') {
+        renderSearchResults();
+        setTimeout(() => document.getElementById('searchInput').focus({ preventScroll: true }), 350);
+    }
+}
+
+function closeSheets() {
+    if (!openSheetId) return;
+    document.getElementById(openSheetId).classList.remove('open');
+    document.getElementById('sheetOverlay').classList.remove('open');
+    document.body.classList.remove('sheet-open');
+    openSheetId = null;
+    syncBottomNav();
+}
+
+function onBottomNav(target) {
+    if (target === 'home') { closeSheets(); setScreen('home'); }
+    else if (target === 'menu') { closeSheets(); setScreen('menu'); }
+    else if (target === 'categories') openSheet('sheetCategories');
+    else if (target === 'search') openSheet('sheetSearch');
+    else if (target === 'call') openSheet('sheetCall');
+}
+
+// ==================== PAGE-TURN GESTURES ====================
+function setupPageGestures() {
+    const stage = document.getElementById('leafStage');
+    let startX = 0, startY = 0, tracking = false;
+
+    stage.addEventListener('touchstart', (e) => {
+        if (e.touches.length !== 1) return;
+        tracking = true;
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+    }, { passive: true });
+
+    stage.addEventListener('touchend', (e) => {
+        if (!tracking) return;
+        tracking = false;
+        const dx = e.changedTouches[0].clientX - startX;
+        const dy = e.changedTouches[0].clientY - startY;
+        if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.5) stepPage(dx < 0 ? 1 : -1);
+    }, { passive: true });
+
+    document.addEventListener('keydown', (e) => {
+        if (currentScreen !== 'menu' || openSheetId || !document.getElementById('customerMenu').classList.contains('active')) return;
+        if (document.getElementById('quickViewModal').classList.contains('active')) return;
+        if (e.key === 'ArrowRight') stepPage(1);
+        if (e.key === 'ArrowLeft') stepPage(-1);
+    });
+
+    document.getElementById('pagerPrev').addEventListener('click', () => stepPage(-1));
+    document.getElementById('pagerNext').addEventListener('click', () => stepPage(1));
 }
 
 // ==================== INITIALIZATION ====================
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('footerYear').textContent = new Date().getFullYear();
 
-    // Top nav links (customer / admin)
-    document.querySelectorAll('.nav-link[data-view]').forEach(btn => {
-        btn.addEventListener('click', () => switchView(btn.dataset.view));
+    document.querySelectorAll('.bn-item').forEach(btn => {
+        btn.addEventListener('click', () => onBottomNav(btn.dataset.nav));
     });
 
-    // Mobile hamburger
-    const hamburger = document.getElementById('navHamburger');
-    if (hamburger) {
-        hamburger.addEventListener('click', () => {
-            document.getElementById('navLinks').classList.toggle('mobile-open');
-        });
-    }
+    document.getElementById('sheetOverlay').addEventListener('click', closeSheets);
+    document.querySelectorAll('[data-close-sheet]').forEach(btn => btn.addEventListener('click', closeSheets));
 
-    // Brand click -> scroll to top / customer view
-    const brand = document.getElementById('navBrand');
-    if (brand) {
-        brand.addEventListener('click', () => {
-            if (!document.getElementById('customerMenu').classList.contains('active')) {
-                switchView('customer');
-            } else {
-                scrollToTop();
-            }
-        });
-    }
+    document.getElementById('heroCta').addEventListener('click', () => {
+        playMenuBookIntro(() => setScreen('menu'));
+    });
 
-    // Hero CTA
-    const heroCta = document.getElementById('heroCta');
-    if (heroCta) {
-        heroCta.addEventListener('click', () => {
-            playMenuBookIntro(() => scrollToMenu());
-        });
-    }
+    document.getElementById('staffLink').addEventListener('click', () => switchView('admin'));
 
-    // Admin tabs
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
 
-    // Edit item modal
-    const editModal = document.getElementById('editItemModal');
-    if (editModal) {
-        editModal.addEventListener('click', (e) => {
-            if (e.target.id === 'editItemModal') closeEditModal();
+    ['editItemModal', 'quickViewModal'].forEach(id => {
+        const modal = document.getElementById(id);
+        modal.addEventListener('click', (e) => {
+            if (e.target.id !== id) return;
+            if (id === 'editItemModal') closeEditModal(); else closeQuickView();
         });
-    }
+    });
 
-    // Quick view modal
-    const quickViewModal = document.getElementById('quickViewModal');
-    if (quickViewModal) {
-        quickViewModal.addEventListener('click', (e) => {
-            if (e.target.id === 'quickViewModal') closeQuickView();
-        });
-    }
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheets(); });
 
     setupAdminLoginForm();
     setupSearchAndFilters();
+    setupPageGestures();
 
-    // Scroll-to-top FAB
-    const fabTop = document.getElementById('fabTop');
-    if (fabTop) fabTop.addEventListener('click', scrollToTop);
-
-    window.addEventListener('resize', () => updateStickyOffset());
-
-    // Initial render
     initRestaurantForm();
     displayMenuItems();
     updateCustomerMenu();
-    updateStickyOffset();
+    syncBottomNav();
 
     // Direct QR-code link support (?menu=view)
     const params = new URLSearchParams(window.location.search);
-    if (params.has('menu') && params.get('menu') === 'view') {
-        switchView('customer');
-    }
+    if (params.get('menu') === 'view') switchView('customer');
 });
