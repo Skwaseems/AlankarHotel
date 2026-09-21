@@ -208,9 +208,32 @@ function loadData() {
 
 function saveData(data) {
     localStorage.setItem('menuData', JSON.stringify(data));
+
+    // Also save to Firebase (async, non-blocking)
+    if (typeof saveDataToFirebase === 'function') {
+        saveDataToFirebase(data).catch(err => console.warn('Firebase save failed:', err));
+    }
 }
 
 let menuData = loadData();
+
+// Sync with Firebase on page ready (pull latest data)
+document.addEventListener('DOMContentLoaded', async () => {
+    if (typeof loadDataFromFirebase === 'function' && firebaseReady) {
+        try {
+            const fbData = await loadDataFromFirebase();
+            if (fbData && JSON.stringify(fbData) !== JSON.stringify(menuData)) {
+                menuData = fbData;
+                localStorage.setItem('menuData', JSON.stringify(fbData));
+                if (typeof updateCustomerMenu === 'function') {
+                    updateCustomerMenu(true);
+                }
+            }
+        } catch (err) {
+            console.warn('Firebase sync failed:', err);
+        }
+    }
+});
 
 // ==================== DIET & CATEGORY HELPERS ====================
 const CATEGORY_ICONS = [
