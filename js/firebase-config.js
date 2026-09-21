@@ -89,3 +89,33 @@ async function saveDataToFirebase(data) {
     return false;
   }
 }
+
+// Load admin password from Firebase
+async function loadAdminPasswordFromFirebase() {
+  if (!firebaseReady || !db) return null;
+  
+  try {
+    const { ref, get } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js');
+    const passwordRef = ref(db, 'adminPasswordHash');
+    const snapshot = await get(passwordRef);
+    return snapshot.exists() ? snapshot.val() : null;
+  } catch (err) {
+    console.warn('Firebase password load failed:', err.message);
+    return null;
+  }
+}
+
+// Save admin password to Firebase
+async function saveAdminPasswordToFirebase(passwordHash) {
+  if (!firebaseReady || !db) return false;
+  
+  try {
+    const { ref, set } = await import('https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js');
+    const passwordRef = ref(db, 'adminPasswordHash');
+    await set(passwordRef, passwordHash);
+    return true;
+  } catch (err) {
+    console.warn('Firebase password save failed:', err.message);
+    return false;
+  }
+}

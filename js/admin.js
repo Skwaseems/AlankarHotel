@@ -16,7 +16,21 @@ async function sha256Hex(text) {
     return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-function getStoredAdminPasswordHash() {
+async function getStoredAdminPasswordHash() {
+    // Try Firebase first
+    if (typeof loadAdminPasswordFromFirebase === 'function' && firebaseReady) {
+        try {
+            const fbPassword = await loadAdminPasswordFromFirebase();
+            if (fbPassword) {
+                localStorage.setItem('adminPasswordHash', fbPassword);
+                return fbPassword;
+            }
+        } catch (err) {
+            console.warn('Firebase password load failed:', err);
+        }
+    }
+
+    // Fallback to localStorage
     return localStorage.getItem('adminPasswordHash') || DEFAULT_ADMIN_PASSWORD_HASH;
 }
 
@@ -70,24 +84,35 @@ function changeAdminPassword() {
         return;
     }
 
-    sha256Hex(newPassword).then(hash => {
+    sha256Hex(newPassword).then(async hash => {
         localStorage.setItem('adminPasswordHash', hash);
+
+        // Also save to Firebase
+        if (typeof saveAdminPasswordToFirebase === 'function') {
+            try {
+                await saveAdminPasswordToFirebase(hash);
+            } catch (err) {
+                console.warn('Firebase password save failed:', err);
+            }
+        }
+
         document.getElementById('newAdminPassword').value = '';
         document.getElementById('confirmAdminPassword').value = '';
         showMessage('passwordMessage', 'Admin password updated successfully! ✓');
-        toast('Admin password updated. Use it next time you log in.');
+        toast('Admin password updated on all phones. Use it next time you log in.');
     });
 }
 
 function setupAdminLoginForm() {
-    document.getElementById('adminLoginForm').addEventListener('submit', (e) => {
+    document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const input = document.getElementById('adminPasswordInput');
         const errorEl = document.getElementById('loginError');
         const password = input.value;
 
-        sha256Hex(password).then(hash => {
-            if (hash === getStoredAdminPasswordHash()) {
+        sha256Hex(password).then(async hash => {
+            const storedHash = await getStoredAdminPasswordHash();
+            if (hash === storedHash) {
                 sessionStorage.setItem('adminAuthenticated', 'true');
                 input.value = '';
                 errorEl.classList.remove('show');
