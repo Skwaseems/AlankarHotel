@@ -1,0 +1,70 @@
+/* ====================================================================
+   RESPONSIVE OVERRIDES
+   ==================================================================== */
+@media (max-width: 900px) {
+    .nav-links { display: none; }
+    .nav-hamburger {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .nav-links.mobile-open {
+        display: flex;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
+        background: rgba(14, 14, 14, 0.97);
+        backdrop-filter: blur(14px);
+        padding: 16px 20px 22px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .nav-links.mobile-open .nav-link {
+        padding: 12px 4px;
+        text-align: left;
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero { padding: 110px 16px 70px; }
+
+    .menu-items-container { grid-template-columns: 1fr; }
+
+    .category-items { padding: 4px 16px 2px; }
+
+    .menu-item { flex-wrap: wrap; }
+    .item-info { max-width: 100%; }
+
+    .item-leader { order: 3; width: 100%; flex-basis: 100%; margin-top: 2px; }
+    .item-price { order: 4; margin-top: 4px; }
+
+    .form-row { grid-template-columns: 1fr; }
+
+    .form-group input,
+    .form-group textarea,
+    .search-pill input { font-size: 16px; }
+
+    .quick-nav-row { flex-direction: column; align-items: stretch; }
+    .diet-toggle-group { justify-content: center; }
+
+    .admin-header-row { flex-direction: column; gap: 14px; }
+    .logout-btn { position: static; }
+
+    .floating-contacts { bottom: 16px; right: 14px; }
+    .fab { width: 46px; height: 46px; font-size: 19px; }
+
+    .toast-container { left: 12px; right: 12px; top: auto; bottom: 16px; max-width: none; }
+    .toast { transform: translateY(130%); }
+    .toast.show { transform: translateY(0); }
+}
+
+@media (max-width: 480px) {
+    .category-strip-card { width: 150px; padding: 20px 14px; }
+    .hero-meta { gap: 14px; font-size: 12px; }
+}
