@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alankar Restaurant - Digital Menu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         * {
@@ -13,18 +16,38 @@
         }
 
         :root {
-            --primary: #ff6b35;
-            --secondary: #004e89;
-            --accent: #f7b801;
-            --light-bg: #f8f9fa;
-            --dark-text: #1a1a1a;
-            --border-color: #e0e0e0;
+            --primary: #b8862e;
+            --primary-light: #d8b662;
+            --secondary: #5c0f1c;
+            --secondary-dark: #3a0a12;
+            --secondary-light: #7a1a29;
+            --accent: #c9a227;
+            --cream: #faf6ee;
+            --card-bg: #fffdf9;
+            --dark-text: #241a12;
+            --muted-text: #6b5e4f;
+            --border-color: #e8dcc4;
+            --veg: #2e7d32;
+            --nonveg: #b3261e;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--light-bg);
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--cream);
+            background-image:
+                repeating-linear-gradient(135deg, rgba(201, 162, 39, 0.035) 0px, rgba(201, 162, 39, 0.035) 1px, transparent 1px, transparent 26px),
+                radial-gradient(circle at 10% 0%, rgba(92, 15, 28, 0.05), transparent 45%),
+                radial-gradient(circle at 90% 10%, rgba(201, 162, 39, 0.08), transparent 40%);
+            background-attachment: fixed;
             color: var(--dark-text);
+        }
+
+        h1, h2, h3, .restaurant-name, .item-title, .category-header, .item-name {
+            font-family: 'Playfair Display', 'Segoe UI', serif;
         }
 
         /* ==================== ADMIN PANEL ==================== */
@@ -37,11 +60,25 @@
         }
 
         .admin-header {
-            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
-            color: white;
-            padding: 20px;
+            background: linear-gradient(135deg, var(--secondary-dark) 0%, var(--secondary) 55%, var(--secondary-light) 100%);
+            color: var(--primary-light);
+            padding: 26px 20px;
             text-align: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 20px rgba(58, 10, 18, 0.25);
+            border-bottom: 3px solid var(--accent);
+        }
+
+        .admin-header h1 {
+            color: #fbeecb;
+            font-size: 26px;
+            letter-spacing: 0.5px;
+        }
+
+        .admin-header p {
+            color: rgba(251, 238, 203, 0.8);
+            font-family: 'Poppins', sans-serif;
+            margin-top: 6px;
+            font-size: 13px;
         }
 
         .admin-container {
@@ -60,24 +97,25 @@
         .tab-btn {
             padding: 10px 20px;
             border: none;
-            background: white;
+            background: var(--card-bg);
             color: var(--secondary);
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
             border: 2px solid var(--border-color);
             transition: all 0.3s;
+            font-family: 'Poppins', sans-serif;
         }
 
         .tab-btn.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
+            background: linear-gradient(135deg, var(--secondary), var(--secondary-light));
+            color: #fbeecb;
+            border-color: var(--secondary);
         }
 
         .tab-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(92, 15, 28, 0.15);
         }
 
         .tab-content {
@@ -90,10 +128,11 @@
 
         /* Restaurant Settings Form */
         .settings-form {
-            background: white;
+            background: var(--card-bg);
             padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            box-shadow: 0 2px 16px rgba(92, 15, 28, 0.06);
+            border: 1px solid var(--border-color);
         }
 
         .form-group {
@@ -105,6 +144,8 @@
             font-weight: 600;
             margin-bottom: 8px;
             color: var(--secondary);
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
         }
 
         .form-group input,
@@ -112,17 +153,18 @@
             width: 100%;
             padding: 12px;
             border: 1px solid var(--border-color);
-            border-radius: 5px;
+            border-radius: 6px;
             font-family: inherit;
             font-size: 14px;
             transition: border-color 0.3s;
+            background: #fffefb;
         }
 
         .form-group input:focus,
         .form-group textarea:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 5px rgba(255, 107, 53, 0.2);
+            box-shadow: 0 0 0 3px rgba(184, 134, 46, 0.15);
         }
 
         .form-row {
@@ -139,15 +181,16 @@
 
         /* Menu Item Form */
         .menu-form {
-            background: white;
+            background: var(--card-bg);
             padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            box-shadow: 0 2px 16px rgba(92, 15, 28, 0.06);
             margin-bottom: 30px;
+            border: 1px solid var(--border-color);
         }
 
         .form-section-title {
-            font-size: 18px;
+            font-size: 19px;
             font-weight: 700;
             color: var(--secondary);
             margin-bottom: 20px;
@@ -164,49 +207,49 @@
         .btn {
             padding: 12px 24px;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
             font-size: 14px;
             transition: all 0.3s;
+            font-family: 'Poppins', sans-serif;
         }
 
         .btn-primary {
-            background: var(--primary);
-            color: white;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: #2a1c04;
         }
 
         .btn-primary:hover {
-            background: #e55a2b;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+            box-shadow: 0 6px 16px rgba(184, 134, 46, 0.35);
         }
 
         .btn-secondary {
             background: var(--secondary);
-            color: white;
+            color: #fbeecb;
         }
 
         .btn-secondary:hover {
-            background: #003d6b;
+            background: var(--secondary-dark);
         }
 
         .btn-success {
-            background: #28a745;
+            background: #2e7d32;
             color: white;
         }
 
         .btn-success:hover {
-            background: #218838;
+            background: #256428;
         }
 
         .btn-danger {
-            background: #dc3545;
+            background: var(--nonveg);
             color: white;
         }
 
         .btn-danger:hover {
-            background: #c82333;
+            background: #8f1d17;
         }
 
         .btn-small {
@@ -222,28 +265,29 @@
         }
 
         .menu-item-card {
-            background: white;
+            background: var(--card-bg);
             border-radius: 10px;
             padding: 15px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 10px rgba(92, 15, 28, 0.06);
             border-left: 4px solid var(--primary);
             transition: all 0.3s;
         }
 
         .menu-item-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 20px rgba(92, 15, 28, 0.12);
         }
 
         .item-category {
             display: inline-block;
-            background: var(--accent);
-            color: var(--dark-text);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: #2a1c04;
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
             margin-bottom: 10px;
+            font-family: 'Poppins', sans-serif;
         }
 
         .item-name {
@@ -256,8 +300,9 @@
         .item-rate {
             font-size: 14px;
             color: var(--primary);
-            font-weight: 600;
+            font-weight: 700;
             margin-bottom: 12px;
+            font-family: 'Poppins', sans-serif;
         }
 
         .item-actions {
@@ -275,71 +320,159 @@
         }
 
         .menu-header {
-            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
-            color: white;
-            padding: 30px 20px;
+            background: linear-gradient(135deg, var(--secondary-dark) 0%, var(--secondary) 55%, var(--secondary-light) 100%);
+            color: #fbeecb;
+            padding: 40px 20px 32px;
             text-align: center;
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 24px rgba(58, 10, 18, 0.3);
+            border-bottom: 3px solid var(--accent);
         }
 
         .restaurant-name {
-            font-size: 32px;
+            font-size: 38px;
             font-weight: 800;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
+            letter-spacing: 0.5px;
+        }
+
+        .restaurant-tagline {
+            font-family: 'Poppins', sans-serif;
+            font-size: 12px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--primary-light);
+            margin-bottom: 14px;
+            font-weight: 500;
+        }
+
+        .header-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 0 auto 16px;
+            max-width: 260px;
+        }
+
+        .header-divider::before,
+        .header-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+
+        .header-divider span {
+            color: var(--accent);
+            font-size: 14px;
         }
 
         .restaurant-contact {
             font-size: 14px;
             opacity: 0.95;
             margin-bottom: 5px;
+            font-family: 'Poppins', sans-serif;
         }
 
         .restaurant-contact a {
-            color: white;
+            color: #fbeecb;
             text-decoration: none;
             font-weight: 600;
         }
 
         .restaurant-contact a:hover {
             text-decoration: underline;
+            color: var(--primary-light);
         }
 
         .menu-container {
             max-width: 1000px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 24px 20px 60px;
+        }
+
+        .menu-legend {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+            padding: 12px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 12.5px;
+            color: var(--muted-text);
+        }
+
+        .menu-legend .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .category-section {
-            margin-bottom: 40px;
-            background: white;
-            border-radius: 10px;
+            margin-bottom: 36px;
+            background: var(--card-bg);
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 3px 16px rgba(92, 15, 28, 0.07);
+            border: 1px solid var(--border-color);
+            opacity: 0;
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .category-section:nth-of-type(1) { animation-delay: 0.02s; }
+        .category-section:nth-of-type(2) { animation-delay: 0.06s; }
+        .category-section:nth-of-type(3) { animation-delay: 0.10s; }
+        .category-section:nth-of-type(4) { animation-delay: 0.14s; }
+        .category-section:nth-of-type(5) { animation-delay: 0.18s; }
+        .category-section:nth-of-type(6) { animation-delay: 0.22s; }
+        .category-section:nth-of-type(n+7) { animation-delay: 0.26s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(14px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .category-header {
-            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
-            color: white;
-            padding: 15px 20px;
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-light) 100%);
+            color: #fbeecb;
+            padding: 16px 20px;
             font-size: 20px;
             font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .category-icon {
+            font-size: 22px;
+            filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3));
         }
 
         .category-items {
-            padding: 20px;
+            padding: 10px 20px 6px;
         }
 
         .menu-item {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid var(--border-color);
+            align-items: baseline;
+            padding: 14px 0;
+            border-bottom: 1px dashed var(--border-color);
+            gap: 10px;
         }
 
         .menu-item:last-child {
@@ -347,29 +480,93 @@
         }
 
         .item-info {
-            flex: 1;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            max-width: 68%;
+        }
+
+        .item-title-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .diet-mark {
+            display: inline-block;
+            width: 13px;
+            height: 13px;
+            border-radius: 2px;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .diet-mark.veg {
+            border: 1.5px solid var(--veg);
+        }
+
+        .diet-mark.veg::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: var(--veg);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .diet-mark.nonveg {
+            border: 1.5px solid var(--nonveg);
+        }
+
+        .diet-mark.nonveg::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 57%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            border-left: 3.5px solid transparent;
+            border-right: 3.5px solid transparent;
+            border-bottom: 6px solid var(--nonveg);
+        }
+
+        .diet-marks {
+            display: inline-flex;
+            gap: 3px;
+            flex-shrink: 0;
         }
 
         .item-title {
-            font-size: 16px;
+            font-size: 16.5px;
             font-weight: 700;
             color: var(--secondary);
-            margin-bottom: 4px;
         }
 
         .item-description {
-            font-size: 13px;
-            color: #666;
+            font-size: 12.5px;
+            color: var(--muted-text);
+            font-family: 'Poppins', sans-serif;
+            margin-top: 3px;
+        }
+
+        .item-leader {
+            flex: 1;
+            border-bottom: 2px dotted var(--border-color);
+            margin-bottom: 6px;
+            min-width: 16px;
         }
 
         .item-price {
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 700;
             color: var(--primary);
             white-space: nowrap;
-            margin-left: 20px;
-            min-width: 80px;
-            text-align: right;
+            flex-shrink: 0;
+            font-family: 'Playfair Display', serif;
         }
 
         .empty-message {
@@ -380,12 +577,13 @@
 
         /* QR Code Section */
         .qr-section {
-            background: white;
+            background: var(--card-bg);
             padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            box-shadow: 0 2px 16px rgba(92, 15, 28, 0.06);
             text-align: center;
             margin-bottom: 30px;
+            border: 1px solid var(--border-color);
         }
 
         .qr-section h3 {
@@ -395,9 +593,10 @@
 
         #qrcode {
             display: inline-block;
-            padding: 10px;
+            padding: 12px;
             background: white;
             border-radius: 10px;
+            border: 1px solid var(--border-color);
         }
 
         .qr-url {
@@ -406,7 +605,7 @@
             font-size: 12px;
             color: #666;
             padding: 10px;
-            background: var(--light-bg);
+            background: var(--cream);
             border-radius: 5px;
             font-family: monospace;
         }
@@ -421,29 +620,31 @@
 
         /* Navigation */
         .nav-tabs {
-            background: white;
+            background: var(--card-bg);
             padding: 15px 20px;
             display: flex;
             gap: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 8px rgba(92, 15, 28, 0.06);
             flex-wrap: wrap;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .nav-btn {
             padding: 10px 20px;
             border: none;
-            background: var(--light-bg);
+            background: var(--cream);
             color: var(--secondary);
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: 600;
             transition: all 0.3s;
             border: 2px solid transparent;
+            font-family: 'Poppins', sans-serif;
         }
 
         .nav-btn.active {
-            background: var(--primary);
-            color: white;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: #2a1c04;
         }
 
         .nav-btn:hover {
@@ -453,7 +654,7 @@
         /* Responsive */
         @media (max-width: 768px) {
             .restaurant-name {
-                font-size: 24px;
+                font-size: 27px;
             }
 
             .menu-items-container {
@@ -461,19 +662,27 @@
             }
 
             .category-items {
-                padding: 15px;
+                padding: 6px 15px 4px;
             }
 
             .menu-item {
-                flex-direction: column;
-                align-items: flex-start;
+                flex-wrap: wrap;
+            }
+
+            .item-info {
+                max-width: 100%;
+            }
+
+            .item-leader {
+                order: 3;
+                width: 100%;
+                flex-basis: 100%;
+                margin-top: 2px;
             }
 
             .item-price {
-                margin-left: 0;
-                margin-top: 8px;
-                min-width: auto;
-                text-align: left;
+                order: 4;
+                margin-top: 4px;
             }
 
             .form-group input,
@@ -484,12 +693,13 @@
 
         /* Success Message */
         .success-message {
-            background: #d4edda;
-            color: #155724;
+            background: #e3f3e4;
+            color: #1e5e21;
             padding: 15px;
-            border-radius: 5px;
+            border-radius: 6px;
             margin-bottom: 20px;
             display: none;
+            border: 1px solid #bfe3c1;
         }
 
         .success-message.show {
@@ -521,14 +731,16 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background: var(--primary);
-            color: white;
+            background: linear-gradient(135deg, var(--secondary), var(--secondary-light));
+            color: var(--primary-light);
+            border: 2px solid var(--accent);
             padding: 12px 16px;
             border-radius: 50%;
             cursor: pointer;
             display: none;
             z-index: 99;
-            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+            box-shadow: 0 4px 14px rgba(58, 10, 18, 0.35);
+            font-weight: 700;
         }
 
         .scroll-top.show {
@@ -547,11 +759,18 @@
     <div class="customer-menu active" id="customerMenu">
         <div class="menu-header">
             <div class="restaurant-name" id="displayName">Alankar Restaurant</div>
+            <div class="restaurant-tagline">Authentic Flavors &bull; Traditional Recipes</div>
+            <div class="header-divider"><span>&#10070;</span></div>
             <div class="restaurant-contact" id="displayPhone">📱 +91 9404790786</div>
             <div class="restaurant-contact" id="displayTimings">⏰ 09:00 AM - 11:30 AM (Breakfast) | 11:30 AM - 11:00 PM</div>
         </div>
 
         <div class="menu-container">
+            <div class="menu-legend">
+                <span class="legend-item"><span class="diet-mark veg"></span> Vegetarian</span>
+                <span class="legend-item"><span class="diet-mark nonveg"></span> Non-Vegetarian</span>
+                <span class="legend-item"><span class="diet-marks"><span class="diet-mark veg"></span><span class="diet-mark nonveg"></span></span> Both Options</span>
+            </div>
             <div id="menuItemsDisplay"></div>
         </div>
     </div>
@@ -880,6 +1099,47 @@
 
         let menuData = loadData();
 
+        // ==================== DIET & CATEGORY HELPERS ====================
+        const CATEGORY_ICONS = [
+            [/breakfast/i, '🍳'],
+            [/biryani|pulao|rice/i, '🍚'],
+            [/moghlai|chicken|mutton/i, '🍗'],
+            [/dal/i, '🥘'],
+            [/roti|paratha/i, '🫓'],
+            [/salad/i, '🥗'],
+            [/chinese/i, '🥡'],
+            [/soup/i, '🍲'],
+            [/noodle/i, '🍜'],
+            [/drink/i, '🥤'],
+            [/starter/i, '🍢'],
+            [/kebab/i, '🍖'],
+            [/appetizer/i, '🧆'],
+            [/chop suey/i, '🥡']
+        ];
+
+        function getCategoryIcon(category) {
+            for (const [pattern, icon] of CATEGORY_ICONS) {
+                if (pattern.test(category)) return icon;
+            }
+            return '🍽️';
+        }
+
+        function classifyDiet(name) {
+            const hasNonVeg = /chicken|mutton|egg|kheema|liver|fish|prawn|meat/i.test(name);
+            const hasVegWord = /\bveg\.?\b/i.test(name);
+            if (hasNonVeg && hasVegWord) return 'both';
+            if (hasNonVeg) return 'nonveg';
+            return 'veg';
+        }
+
+        function dietMarkup(name) {
+            const diet = classifyDiet(name);
+            if (diet === 'both') {
+                return '<span class="diet-marks"><span class="diet-mark veg"></span><span class="diet-mark nonveg"></span></span>';
+            }
+            return `<span class="diet-marks"><span class="diet-mark ${diet}"></span></span>`;
+        }
+
         // ==================== RESTAURANT SETTINGS ====================
         function initRestaurantForm() {
             document.getElementById('restaurantName').value = menuData.restaurant.name;
@@ -952,7 +1212,7 @@
             container.innerHTML = menuData.items.map(item => `
                 <div class="menu-item-card">
                     <div class="item-category">${escapeHtml(item.category)}</div>
-                    <div class="item-name">${escapeHtml(item.name)}</div>
+                    <div class="item-name">${dietMarkup(item.name)} ${escapeHtml(item.name)}</div>
                     <div class="item-rate">₹ ${escapeHtml(item.rate)}</div>
                     ${item.description ? `<div class="item-description">${escapeHtml(item.description)}</div>` : ''}
                     <div class="item-actions">
@@ -1001,14 +1261,18 @@
 
             display.innerHTML = Object.entries(grouped).map(([category, items]) => `
                 <div class="category-section">
-                    <div class="category-header">${escapeHtml(category)}</div>
+                    <div class="category-header"><span class="category-icon">${getCategoryIcon(category)}</span>${escapeHtml(category)}</div>
                     <div class="category-items">
                         ${items.map(item => `
                             <div class="menu-item">
                                 <div class="item-info">
-                                    <div class="item-title">${escapeHtml(item.name)}</div>
+                                    <div class="item-title-row">
+                                        ${dietMarkup(item.name)}
+                                        <div class="item-title">${escapeHtml(item.name)}</div>
+                                    </div>
                                     ${item.description ? `<div class="item-description">${escapeHtml(item.description)}</div>` : ''}
                                 </div>
+                                <div class="item-leader"></div>
                                 <div class="item-price">₹ ${escapeHtml(item.rate)}</div>
                             </div>
                         `).join('')}
@@ -1033,7 +1297,7 @@
                 text: menuUrl,
                 width: 200,
                 height: 200,
-                colorDark: '#000000',
+                colorDark: '#5c0f1c',
                 colorLight: '#ffffff',
                 correctLevel: QRCode.CorrectLevel.H
             });
