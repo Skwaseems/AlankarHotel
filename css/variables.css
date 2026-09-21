@@ -1,0 +1,57 @@
+/* ====================================================================
+   DESIGN TOKENS
+   Luxury dark + warm food theme. Change values here to re-theme the
+   entire site (e.g. for a different restaurant brand).
+   ==================================================================== */
+:root {
+    /* Core palette */
+    --black: #0e0e0e;
+    --charcoal: #1b1b1b;
+    --charcoal-light: #262220;
+    --gold: #c8a14a;
+    --gold-light: #e6c878;
+    --orange: #ff8a00;
+    --white: #ffffff;
+    --off-white: #f3ede0;
+
+    /* Semantic colors */
+    --bg: var(--black);
+    --surface: var(--charcoal);
+    --surface-raised: var(--charcoal-light);
+    --text: var(--off-white);
+    --text-muted: #a99d8a;
+    --border: rgba(200, 161, 74, 0.18);
+    --border-strong: rgba(200, 161, 74, 0.4);
+    --veg: #3fae4a;
+    --nonveg: #e0483a;
+
+    /* Gradients */
+    --gradient-gold: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
+    --gradient-orange-glow: radial-gradient(circle, rgba(255, 138, 0, 0.35) 0%, rgba(255, 138, 0, 0) 70%);
+    --gradient-hero: linear-gradient(180deg, rgba(14, 14, 14, 0.4) 0%, rgba(14, 14, 14, 0.85) 65%, var(--black) 100%);
+    --glass-bg: rgba(27, 27, 27, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.08);
+
+    /* Typography */
+    --font-display: 'Playfair Display', 'Segoe UI', serif;
+    --font-title: 'Bebas Neue', 'Segoe UI', sans-serif;
+    --font-body: 'Poppins', 'DM Sans', 'Segoe UI', sans-serif;
+    --font-accent: 'DM Sans', 'Poppins', sans-serif;
+
+    /* Motion */
+    --ease-premium: cubic-bezier(0.22, 0.8, 0.24, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --dur-fast: 0.2s;
+    --dur-base: 0.35s;
+    --dur-slow: 0.6s;
+
+    /* Layout */
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 22px;
+    --radius-pill: 999px;
+    --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.35);
+    --shadow-gold: 0 8px 24px rgba(200, 161, 74, 0.25);
+    --sticky-offset: 180px;
+    --nav-height: 72px;
+}
