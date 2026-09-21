@@ -327,6 +327,38 @@
         </div>
     </div>
 
+    <!-- Menu Book Intro (plays when "Explore Menu" is clicked, then hands off to the real menu) -->
+    <div class="book-overlay" id="bookOverlay">
+        <button class="book-skip" id="bookSkipBtn" type="button">Skip ✕</button>
+        <div class="book-stage">
+            <div class="book" id="menuBook">
+                <div class="book-cover">
+                    <div class="book-cover-inner">
+                        <span class="book-emblem">🍽️</span>
+                        <h2 id="bookCoverName">Alankar Restaurant</h2>
+                        <p>Menu</p>
+                    </div>
+                </div>
+                <div class="book-page">
+                    <div class="page-face front" data-page="1"></div>
+                    <div class="page-face back"></div>
+                </div>
+                <div class="book-page">
+                    <div class="page-face front" data-page="2"></div>
+                    <div class="page-face back"></div>
+                </div>
+                <div class="book-page">
+                    <div class="page-face front" data-page="3"></div>
+                    <div class="page-face back"></div>
+                </div>
+                <div class="book-page">
+                    <div class="page-face front" data-page="4"></div>
+                    <div class="page-face back"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- Floating quick-contact buttons (real actions only — no fake cart) -->

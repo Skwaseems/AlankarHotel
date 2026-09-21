@@ -88,7 +88,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Hero CTA
     const heroCta = document.getElementById('heroCta');
-    if (heroCta) heroCta.addEventListener('click', scrollToMenu);
+    if (heroCta) {
+        heroCta.addEventListener('click', () => {
+            playMenuBookIntro(() => scrollToMenu());
+        });
+    }
 
     // Admin tabs
     document.querySelectorAll('.tab-btn').forEach(btn => {

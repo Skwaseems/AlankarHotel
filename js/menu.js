@@ -500,6 +500,30 @@ function closeQuickView() {
     document.getElementById('quickViewModal').classList.remove('active');
 }
 
+// ==================== MENU BOOK INTRO CONTENT ====================
+function populateBookPages() {
+    document.getElementById('bookCoverName').textContent = menuData.restaurant.name;
+
+    const categories = [...new Set(menuData.items.map(item => item.category))];
+    const faces = document.querySelectorAll('#menuBook .page-face.front');
+    faces.forEach((face, i) => {
+        const cat = categories[i];
+        if (cat) {
+            face.innerHTML = `
+                <span class="page-icon">${getCategoryIcon(cat)}</span>
+                <span class="page-title">${escapeHtml(cat)}</span>
+                <span class="page-sub">and more...</span>
+            `;
+        } else {
+            face.innerHTML = `
+                <span class="page-icon">✨</span>
+                <span class="page-title">Full Menu</span>
+                <span class="page-sub">Awaits</span>
+            `;
+        }
+    });
+}
+
 function updateFloatingContacts(phoneNumbers) {
     const callFab = document.getElementById('fabCall');
     const whatsappFab = document.getElementById('fabWhatsapp');
