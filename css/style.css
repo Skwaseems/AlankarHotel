@@ -63,6 +63,17 @@ h1, h2, h3, .brand-name, .item-title, .category-title, .item-name, .section-titl
 .ambient-glow.gold { background: var(--gradient-orange-glow); top: -10%; left: -10%; }
 .ambient-glow.orange { background: radial-gradient(circle, rgba(200, 161, 74, 0.3), transparent 70%); bottom: -15%; right: -10%; animation-duration: 22s; }
 
+/* Decorative line-art watermark: brand-neutral food icons, never presented
+   as real photography of the restaurant's dishes. */
+.watermark-pattern {
+    position: absolute;
+    inset: 0;
+    background-image: url('../assets/watermark-pattern.svg');
+    background-repeat: repeat;
+    background-size: 260px 260px;
+    opacity: 0.05;
+}
+
 .cursor-glow {
     position: fixed;
     width: 280px;
@@ -214,6 +225,22 @@ h1, h2, h3, .brand-name, .item-title, .category-title, .item-name, .section-titl
         radial-gradient(ellipse at 50% 20%, rgba(255, 138, 0, 0.14), transparent 55%),
         radial-gradient(ellipse at 15% 80%, rgba(200, 161, 74, 0.12), transparent 50%),
         linear-gradient(180deg, var(--black) 0%, #150f0a 55%, var(--black) 100%);
+}
+
+.hero-emblem {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: min(720px, 110vw);
+    height: min(720px, 110vw);
+    transform: translate(-50%, -50%);
+    background-image: url('../assets/watermark-emblem.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    opacity: 0.07;
+    animation: spinSlow 140s linear infinite;
+    pointer-events: none;
 }
 
 .hero-particles {
@@ -1004,6 +1031,8 @@ mark.search-hit {
 
 /* ==================== FOOTER ==================== */
 .site-footer {
+    position: relative;
+    overflow: hidden;
     background: linear-gradient(180deg, var(--surface) 0%, var(--black) 100%);
     border-top: 2px solid transparent;
     border-image: var(--gradient-gold) 1;
@@ -1011,7 +1040,7 @@ mark.search-hit {
     text-align: center;
 }
 
-.footer-inner { max-width: 640px; margin: 0 auto; }
+.footer-inner { position: relative; max-width: 640px; margin: 0 auto; }
 
 .footer-brand {
     font-family: var(--font-display);
@@ -1062,11 +1091,25 @@ mark.search-hit {
 .admin-panel.active { display: block; }
 
 .admin-header {
+    position: relative;
+    overflow: hidden;
     background: linear-gradient(135deg, var(--black), var(--surface));
     border-bottom: 2px solid transparent;
     border-image: var(--gradient-gold) 1;
     padding: 100px 20px 34px;
     text-align: center;
+}
+
+.admin-header::before,
+.site-footer::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url('../assets/watermark-pattern.svg');
+    background-repeat: repeat;
+    background-size: 260px 260px;
+    opacity: 0.05;
+    pointer-events: none;
 }
 
 .admin-header-row {
