@@ -281,17 +281,24 @@
                 <!-- QR Code Tab -->
                 <div class="tab-content" id="qrcodeTab">
                     <div class="qr-section">
-                        <h3>📱 Menu Access Link & QR Code</h3>
-                        <p style="color: var(--text-muted); margin-bottom: 20px;">Customers can scan this QR code or use the link below to view your menu</p>
+                        <h3>📱 Menu Access Link & Premium QR Code</h3>
+                        <p style="color: var(--text-muted); margin-bottom: 20px;">Share a premium QR code with customers. Download as PDF or get the direct link.</p>
 
-                        <div id="qrcode"></div>
+                        <div class="qr-buttons" style="margin-top: 20px;">
+                            <a href="qr-premium.html" target="_blank" class="btn btn-primary" style="text-decoration: none; display: inline-block;">🎨 Open Premium QR Page</a>
+                            <a href="qr-premium.html" target="_blank" class="btn btn-secondary" style="text-decoration: none; display: inline-block;">📥 Download as PDF</a>
+                        </div>
 
-                        <div class="qr-url" id="menuLink">Generate QR Code...</div>
-
-                        <div class="qr-buttons">
-                            <button class="btn btn-primary" onclick="generateQRCode()">Regenerate QR Code</button>
-                            <button class="btn btn-secondary" onclick="copyToClipboard()">Copy Link</button>
-                            <button class="btn btn-secondary" id="downloadQrBtn" onclick="downloadQRCode()">Download QR Code</button>
+                        <div style="margin-top: 30px; padding: 20px; background: rgba(200, 161, 74, 0.1); border-radius: 8px; border: 1px solid rgba(200, 161, 74, 0.25);">
+                            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 12px;"><strong style="color: var(--gold-light);">Premium QR Code Features:</strong></p>
+                            <ul style="color: var(--text-muted); font-size: 12.5px; line-height: 1.8; list-position: inside;">
+                                <li>✨ Premium gold & dark theme design</li>
+                                <li>🎨 Restaurant branding and tagline</li>
+                                <li>🔗 Clickable link below QR code</li>
+                                <li>📱 Customer instructions</li>
+                                <li>📥 Download as professional PDF</li>
+                                <li>🖨️ Print-friendly format</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
