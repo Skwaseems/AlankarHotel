@@ -7,7 +7,7 @@
    are dropped and the new files are fetched.
    ==================================================================== */
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v3';
 const SHELL_CACHE = `alankar-shell-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `alankar-runtime-${CACHE_VERSION}`;
 
@@ -39,9 +39,16 @@ const RUNTIME_HOSTS = [
 ];
 
 self.addEventListener('install', (event) => {
+    // cache: 'reload' bypasses the browser's own HTTP cache for each precache
+    // fetch — without it, addAll() can silently capture stale bytes a prior
+    // page load already cached, defeating the whole point of CACHE_VERSION.
     event.waitUntil(
         caches.open(SHELL_CACHE)
-            .then((cache) => cache.addAll(SHELL_FILES))
+            .then((cache) => Promise.all(
+                SHELL_FILES.map((url) =>
+                    fetch(url, { cache: 'reload' }).then((response) => cache.put(url, response))
+                )
+            ))
             .then(() => self.skipWaiting())
     );
 });

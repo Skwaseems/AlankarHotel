@@ -47,7 +47,7 @@ function switchTab(tabName) {
     replayEnterAnimation(tabEl);
 
     if (tabName === 'qrcode') {
-        setTimeout(() => generateQRCode(), 100);
+        showMenuLink();
     }
 }
 

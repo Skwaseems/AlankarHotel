@@ -716,17 +716,6 @@ mark.search-hit {
 .qr-section { text-align: center; margin-bottom: 30px; }
 .qr-section h3 { color: var(--gold-light); margin-bottom: 20px; }
 
-#qrcode {
-    display: inline-block;
-    padding: 14px;
-    background: white;
-    border-radius: 12px;
-    min-height: 200px;
-    min-width: 200px;
-}
-
-.qr-error { color: var(--nonveg); font-size: 13px; padding: 20px; max-width: 240px; }
-
 .qr-url {
     margin-top: 20px;
     word-break: break-all;

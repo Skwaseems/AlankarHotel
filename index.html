@@ -18,7 +18,6 @@
     <link rel="stylesheet" href="css/animations.css">
     <link rel="stylesheet" href="css/customer.css">
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
     <script src="js/firebase-config.js" defer></script>
 
     <script src="js/menu.js" defer></script>
@@ -283,24 +282,16 @@
                 <!-- QR Code Tab -->
                 <div class="tab-content" id="qrcodeTab">
                     <div class="qr-section">
-                        <h3>📱 Menu Access Link & Premium QR Code</h3>
-                        <p style="color: var(--text-muted); margin-bottom: 20px;">Share a premium QR code with customers. Download as PDF or get the direct link.</p>
+                        <h3>📱 Menu Access Link & QR Poster</h3>
+                        <p style="color: var(--text-muted); margin-bottom: 20px;">Share this poster with customers — print it, display it at tables, or send the file directly.</p>
 
-                        <div class="qr-buttons" style="margin-top: 20px;">
-                            <a href="qr-premium.html" target="_blank" class="btn btn-primary" style="text-decoration: none; display: inline-block;">🎨 Open Premium QR Page</a>
-                            <a href="qr-premium.html" target="_blank" class="btn btn-secondary" style="text-decoration: none; display: inline-block;">📥 Download as PDF</a>
-                        </div>
+                        <img src="assets/alankar-qr-poster.png" alt="Alankar Hotel menu QR code poster" style="max-width: 100%; width: 320px; border-radius: 12px; box-shadow: var(--shadow-soft); border: 1px solid var(--border);">
 
-                        <div style="margin-top: 30px; padding: 20px; background: rgba(200, 161, 74, 0.1); border-radius: 8px; border: 1px solid rgba(200, 161, 74, 0.25);">
-                            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 12px;"><strong style="color: var(--gold-light);">Premium QR Code Features:</strong></p>
-                            <ul style="color: var(--text-muted); font-size: 12.5px; line-height: 1.8; list-position: inside;">
-                                <li>✨ Premium gold & dark theme design</li>
-                                <li>🎨 Restaurant branding and tagline</li>
-                                <li>🔗 Clickable link below QR code</li>
-                                <li>📱 Customer instructions</li>
-                                <li>📥 Download as professional PDF</li>
-                                <li>🖨️ Print-friendly format</li>
-                            </ul>
+                        <div class="qr-url" id="menuLink">Loading link...</div>
+
+                        <div class="qr-buttons">
+                            <a href="assets/alankar-qr-poster.png" download="Alankar_Hotel_Menu_QR.png" class="btn btn-primary" style="text-decoration: none; display: inline-block;">📥 Download Poster</a>
+                            <button class="btn btn-secondary" onclick="copyToClipboard()">📋 Copy Link</button>
                         </div>
                     </div>
                 </div>

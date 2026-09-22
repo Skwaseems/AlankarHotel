@@ -190,7 +190,6 @@ function addMenuItem() {
     updateCustomerMenu();
     showMessage('itemMessage', 'Menu item added successfully! ✓');
     toast(`"${name}" added to the menu!`);
-    generateQRCode();
 }
 
 function deleteMenuItem(id) {
@@ -202,7 +201,6 @@ function deleteMenuItem(id) {
         displayMenuItems();
         updateCustomerMenu();
         toast(`"${item.name}" deleted`);
-        generateQRCode();
     }
 }
 
@@ -266,31 +264,12 @@ function saveEditedItem() {
     toast(`"${name}" updated successfully!`);
 }
 
-// ---------- QR Code ----------
-function generateQRCode() {
-    const qrContainer = document.getElementById('qrcode');
-    if (!qrContainer) return;
-    qrContainer.innerHTML = '';
-
+// ---------- QR Code (static premium poster — assets/alankar-qr-poster.png) ----------
+function showMenuLink() {
+    const linkEl = document.getElementById('menuLink');
+    if (!linkEl) return;
     const baseUrl = window.location.href.split('?')[0].split('#')[0];
-    const menuUrl = baseUrl + '?menu=view';
-    document.getElementById('menuLink').textContent = menuUrl;
-
-    if (typeof QRCode === 'undefined') {
-        qrContainer.innerHTML = '<div class="qr-error">⚠️ QR code library failed to load (check your internet connection), but the link above still works — you can copy or share it directly.</div>';
-        document.getElementById('downloadQrBtn').disabled = true;
-        return;
-    }
-
-    document.getElementById('downloadQrBtn').disabled = false;
-    new QRCode(qrContainer, {
-        text: menuUrl,
-        width: 200,
-        height: 200,
-        colorDark: '#0e0e0e',
-        colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.H
-    });
+    linkEl.textContent = baseUrl + '?menu=view';
 }
 
 function copyToClipboard() {
@@ -304,16 +283,4 @@ function copyToClipboard() {
     }).catch(() => {
         toast('Could not copy link', 'error');
     });
-}
-
-function downloadQRCode() {
-    const canvas = document.querySelector('#qrcode canvas');
-    if (!canvas) {
-        toast('QR code is not available to download', 'error');
-        return;
-    }
-    const link = document.createElement('a');
-    link.href = canvas.toDataURL('image/png');
-    link.download = menuData.restaurant.name + '_QRCode.png';
-    link.click();
 }
