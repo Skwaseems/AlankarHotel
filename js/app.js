@@ -8,6 +8,16 @@ let currentScreen = 'home';
 let screenTimer = null;
 let openSheetId = null;
 
+// Registers the offline cache. After one online visit, the customer menu
+// (and last-synced prices) keeps working with no signal.
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch((err) => {
+            console.warn('Service worker registration failed:', err);
+        });
+    });
+}
+
 // ==================== VIEW SWITCH (customer / admin) ====================
 function switchView(view) {
     const adminPanel = document.getElementById('adminPanel');

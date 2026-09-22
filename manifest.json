@@ -1,0 +1,19 @@
+{
+  "name": "Alankar Restaurant — Digital Menu",
+  "short_name": "Alankar Menu",
+  "description": "Browse Alankar Restaurant's digital menu — works even offline.",
+  "start_url": "./index.html?menu=view",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0e0e0e",
+  "theme_color": "#0e0e0e",
+  "icons": [
+    {
+      "src": "assets/watermark-emblem.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
